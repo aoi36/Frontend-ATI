@@ -1,132 +1,80 @@
-
 import React from "react"
 import { useState, useEffect } from "react"
 import Card from "../components/Card"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorAlert from "../components/ErrorAlert"
 import { apiCall } from "../utils/api"
-import "./CoursesPage.css"
+import "./CoursesPage.css" // Make sure to create this CSS file for styling
 
-function CoursesPage() {
+// This component receives 'setCurrentPage' and 'setSelectedCourse' as props from App.jsx
+function CoursesPage({ setCurrentPage, setSelectedCourse }) {
   const [courses, setCourses] = useState([])
-  const [selectedCourse, setSelectedCourse] = useState(null)
-  const [deadlines, setDeadlines] = useState([])
   const [loading, setLoading] = useState(true)
-  const [loadingDeadlines, setLoadingDeadlines] = useState(false)
   const [error, setError] = useState(null)
 
+  // Fetch the list of courses when the component first loads
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true)
+        const data = await apiCall("/api/courses") // Fetches from your API
+        setCourses(data || [])
+        setError(null)
+      } catch (err) {
+        setError(err.message || "Failed to load courses")
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchCourses()
-  }, [])
+  }, []) // The empty array [] means this runs only once
 
-  const fetchCourses = async () => {
-    try {
-      setLoading(true)
-      const data = await apiCall("/api/courses")
-      setCourses(data || [])
-      setError(null)
-    } catch (err) {
-      setError(err.message || "Failed to load courses")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchDeadlines = async (courseId) => {
-    try {
-      setLoadingDeadlines(true)
-      const data = await apiCall(`/api/deadlines/${courseId}`)
-      setDeadlines(data || [])
-    } catch (err) {
-      setError(err.message || "Failed to load deadlines")
-    } finally {
-      setLoadingDeadlines(false)
-    }
-  }
-
-  const handleSelectCourse = (course) => {
-    setSelectedCourse(course)
-    fetchDeadlines(course.id)
+  // This function is called when a user clicks on a course card
+  const handleCourseClick = (course) => {
+    setSelectedCourse(course) // Sets the selected course in App.jsx
+    setCurrentPage("course-detail") // Tells App.jsx to change the page
   }
 
   return (
     <div className="courses-page">
-      <h1 className="page-title">Courses</h1>
+      <h1 className="page-title">My Courses</h1>
 
       {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
-
-      <div className="courses-container">
-        <div className="courses-list">
-          <h2 className="section-title">All Courses</h2>
-          {loading ? (
-            <LoadingSpinner />
-          ) : courses.length > 0 ? (
-            <div className="course-items">
-              {courses.map((course) => (
-                <div
-                  key={course.id}
-                  className={`course-item ${selectedCourse?.id === course.id ? "active" : ""}`}
-                  onClick={() => handleSelectCourse(course)}
+      
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        // A grid to display the course cards
+        <div className="course-list-grid"> 
+          {courses.length > 0 ? (
+            courses.map((course) => (
+              <Card
+                key={course.id} // Use the course ID from your API
+                title={course.name}
+                className="course-card" // For styling (e.g., making it look clickable)
+                onClick={() => handleCourseClick(course)} // This makes the card clickable
+              >
+                {/* You can add any other content inside the card here */}
+                <p>Course ID: {course.id}</p>
+                
+                {/* This link lets the user open the original Moodle page in a new tab */}
+                {/* e.stopPropagation() prevents the card's click event from firing */}
+                <a 
+                  href={course.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="course-name">{course.name}</span>
-                  <span className="course-code">{course.code || "N/A"}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="no-data">No courses found</p>
-          )}
-        </div>
-
-        <div className="course-details">
-          {selectedCourse ? (
-            <>
-              <h2 className="section-title">{selectedCourse.name}</h2>
-              <Card title="Course Information">
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="info-label">Course Code</span>
-                    <span className="info-value">{selectedCourse.code || "N/A"}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Instructor</span>
-                    <span className="info-value">{selectedCourse.instructor || "Unknown"}</span>
-                  </div>
-                </div>
+                  Go to LMS Page
+                </a>
               </Card>
-
-              <div className="deadlines-section">
-                <h3 className="section-title">Upcoming Deadlines</h3>
-                {loadingDeadlines ? (
-                  <LoadingSpinner />
-                ) : deadlines.length > 0 ? (
-                  <div className="deadline-items">
-                    {deadlines.map((deadline, idx) => (
-                      <Card key={idx} className="deadline-card">
-                        <div className="deadline-header">
-                          <span className="deadline-name">{deadline.name || "Assignment"}</span>
-                          <span
-                            className={`deadline-badge ${new Date(deadline.date) < new Date() ? "overdue" : "upcoming"}`}
-                          >
-                            {new Date(deadline.date) < new Date() ? "Overdue" : "Upcoming"}
-                          </span>
-                        </div>
-                        <p className="deadline-date">{new Date(deadline.date).toLocaleDateString()}</p>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="no-data">No deadlines for this course</p>
-                )}
-              </div>
-            </>
+            ))
           ) : (
-            <div className="placeholder">
-              <p>Select a course to view details</p>
-            </div>
+            // Show this if the API returns no courses
+            <p className="no-data">No courses found. Run the /api/scrape endpoint first.</p>
           )}
         </div>
-      </div>
+      )}
     </div>
   )
 }
