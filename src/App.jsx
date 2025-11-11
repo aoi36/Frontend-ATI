@@ -7,12 +7,17 @@ import SearchPage from "./pages/SearchPage"
 import AIToolsPage from "./pages/AIToolsPage"
 import MeetSchedulerPage from "./pages/MeetSchedulerPage"
 import ScraperPage from "./pages/ScraperPage"
+import FlashcardsPage from "./pages/FlashcardsPage"
+
 import "./App.css"
 import CourseDetailPage from "./pages/CourseDetailPage"
 
 function App() {
   const [currentPage, setCurrentPage] = useState("dashboard")
   const [selectedCourse, setSelectedCourse] = useState(null)
+  const [flashcardParams, setFlashcardParams] = useState(null)
+  const [homeworkGraderParams, setHomeworkGraderParams] = useState(null);
+
 
   const renderPage = () => {
     switch (currentPage) {
@@ -30,7 +35,8 @@ function App() {
           return (
             <CourseDetailPage 
               course={selectedCourse} 
-              setCurrentPage={setCurrentPage} 
+              setCurrentPage={setCurrentPage}
+              setFlashcardParams={setFlashcardParams}
             />
           )
         }
@@ -46,6 +52,16 @@ function App() {
         return <MeetSchedulerPage />
       case "scraper":
         return <ScraperPage />
+      case "flashcards":
+        if (flashcardParams) {
+          return <FlashcardsPage 
+            courseId={flashcardParams.courseId} 
+            fileId={flashcardParams.fileId}
+            setCurrentPage={setCurrentPage}
+          />
+        }
+        return <Dashboard />
+
       default:
         return <Dashboard />
     }

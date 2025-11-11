@@ -40,3 +40,8 @@ export async function apiCall(endpoint, options = {}) {
     throw error
   }
 }
+
+export const generateFlashcards = async (courseId, fileId) => {
+  const response = await api.post(`/api/courses/${courseId}/files/${fileId}/flashcards`);
+  return response.data;
+};

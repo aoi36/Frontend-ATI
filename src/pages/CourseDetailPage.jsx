@@ -7,14 +7,32 @@ import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorAlert from "../components/ErrorAlert"
 import "./CourseDetailPage.css"
 import QuestionList from "../components/QuestionList"
-// import "./CourseDetailPage.css" // You'll want to create this CSS file
 
-function CourseDetailPage({ course, setCurrentPage }) {
+function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
   const [deadlines, setDeadlines] = useState([])
   const [files, setFiles] = useState([])
   const [aiContent, setAiContent] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [generatingFlashcards, setGeneratingFlashcards] = useState({})
+
+  const handleGenerateFlashcards = async (filename) => {
+    try {
+      setGeneratingFlashcards(prev => ({ ...prev, [filename]: true }))
+      const endpoint = `/api/courses/${course.course_id}/files/${filename}/flashcards`
+      await apiCall(endpoint, { method: 'POST' })
+      
+      // Set flashcard params and navigate
+      setFlashcardParams({ courseId: course.course_id, fileId: filename })
+      setCurrentPage("flashcards")
+    } catch (err) {
+      setError(`Failed to generate flashcards: ${err.message}`)
+    } finally {
+      setGeneratingFlashcards(prev => ({ ...prev, [filename]: false }))
+    }
+  }
+
+
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -59,58 +77,6 @@ function CourseDetailPage({ course, setCurrentPage }) {
   // Dependency array must also use course.course_id
   }, [course.course_id]) 
   // --- [END FIX] ---
-
-  const getDisplayFiles = () => {
-    const fileSet = new Set(files); // A set of all file names
-    const processedFiles = []; // This will be our new list of file objects
-    
-    // Sort files to process docx/pptx *before* pdf/txt
-    const sortedFiles = [...files].sort((a, b) => {
-        const aExt = a.split('.').pop().toLowerCase();
-        const bExt = b.split('.').pop().toLowerCase();
-        // Prioritize docx/pptx
-        if (aExt.includes('doc') || aExt.includes('ppt')) return -1;
-        if (bExt.includes('doc') || bExt.includes('ppt')) return 1;
-        return 0;
-    });
-
-    for (const filename of sortedFiles) {
-      if (fileSet.has(filename) === false) continue; // Already processed as part of a pair
-
-      const base_name = filename.substring(0, filename.lastIndexOf('.'));
-      const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
-
-      let fileObj = {
-        displayName: decodeURIComponent(filename), // The original name to show
-        linkName: filename,    // The file to link to
-        isViewable: false, // Can it be opened in the browser?
-      };
-
-      if (ext === '.docx' || ext === '.pptx') {
-        const pdf_version = `${base_name}.pdf`;
-        
-        if (fileSet.has(pdf_version)) {
-          // Found a PDF conversion!
-          fileObj.linkName = pdf_version; // Link to the PDF
-          fileObj.isViewable = true;
-          fileSet.delete(pdf_version); // Mark the PDF as "handled"
-        } else {
-          // No PDF, link to original (will download)
-          fileObj.isViewable = false;
-        }
-      } else if (ext === '.pdf' || ext === '.txt') {
-        // It's a PDF or TXT, link to itself (is viewable)
-        fileObj.isViewable = true;
-      }
-      // For .zip, .rar, is_viewable remains false
-
-      processedFiles.push(fileObj);
-      fileSet.delete(filename); // Mark this file as "handled"
-    }
-    return processedFiles;
-  };
-  
-  const displayFiles = getDisplayFiles();
 
   if (loading) return <LoadingSpinner />
   if (error) return <ErrorAlert message={error} onDismiss={() => setError(null)} />
@@ -178,25 +144,29 @@ function CourseDetailPage({ course, setCurrentPage }) {
       </Card>
 
       <Card title="Scraped Files" className="detail-card">
-        {displayFiles.length > 0 ? (
+        {files.length > 0 ? (
           <ul className="file-list">
-            {displayFiles.map((file, i) => (
-              <li key={i}>
-                <a 
-                   href={`${import.meta.env.VITE_API_URL}/api/get_file/${course.course_id}/${encodeURIComponent(file.linkName)}`}
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   // This is important:
-                   // - If it's viewable (PDF/TXT), 'download' is undefined (so it opens in-tab)
-                   // - If it's not viewable (DOCX/ZIP), 'download' is set, forcing a download
-                   download={file.isViewable ? undefined : file.displayName}
-                >
-                  {file.displayName}
-                  {/* Add a helpful (Preview) or (Download) tag */}
-                  <span className="file-type-badge">
-                    {file.isViewable ? " (Preview)" : " (Download)"}
-                  </span>
-                </a>
+            {files.map((filename, i) => (
+              <li key={i} className="file-item">
+                <div className="file-info">
+                  <a href={`${import.meta.env.VITE_API_URL}/api/get_file/${course.course_id}/${encodeURIComponent(filename)}`}
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     download={filename}
+                  >
+                    {decodeURIComponent(filename)}
+                  </a>
+                </div>
+                {(filename.endsWith('.pdf') || filename.endsWith('.docx') ||
+                  filename.endsWith('.pptx') || filename.endsWith('.txt')) && (
+                  <button
+                    onClick={() => handleGenerateFlashcards(filename)}
+                    disabled={generatingFlashcards[filename]}
+                    className="flashcard-button"
+                  >
+                    {generatingFlashcards[filename] ? '⏳ Generating...' : '📇 Flashcards'}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
