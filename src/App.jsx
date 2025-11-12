@@ -17,7 +17,8 @@ function App() {
   const [currentPage, setCurrentPage] = useState("dashboard")
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [flashcardParams, setFlashcardParams] = useState(null)
-  const [homeworkGraderParams, setHomeworkGraderParams] = useState(null);
+  const [homeworkGraderParams, setHomeworkGraderParams] = useState(null)
+  const [homeworkSubmitParams, setHomeworkSubmitParams] = useState(null)
 
 
   const renderPage = () => {
@@ -30,7 +31,10 @@ function App() {
       case "search":
         return <SearchPage />
       case "tools":
-        return <AIToolsPage />
+        return <AIToolsPage
+          setCurrentPage={setCurrentPage}
+          setHomeworkSubmitParams={setHomeworkSubmitParams}
+        />
       case "course-detail":
         if (selectedCourse) {
           return (
@@ -54,7 +58,9 @@ function App() {
       case "scraper":
         return <ScraperPage />
       case "homework-submit":
-        return <HomeworkSubmitPage />
+        return <HomeworkSubmitPage
+          prefilledFileName={homeworkSubmitParams?.prefilledFileName}
+        />
       case "flashcards":
         if (flashcardParams) {
           return <FlashcardsPage 

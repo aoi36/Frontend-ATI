@@ -4,15 +4,56 @@ import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorAlert from "../components/ErrorAlert"
 import "./HomeworkSubmitPage.css"
 
-function HomeworkSubmitPage() {
+function HomeworkSubmitPage({ prefilledFile = null, prefilledFileName = null }) {
   const [assignmentUrl, setAssignmentUrl] = useState("")
+  const [assignments, setAssignments] = useState([])
+  const [loadingAssignments, setLoadingAssignments] = useState(true)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [file, setFile] = useState(null)
+  const [file, setFile] = useState(prefilledFile)
+  const [prefilledFileInfo, setPrefilledFileInfo] = useState(prefilledFileName)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
   const [backendStatus, setBackendStatus] = useState("checking") // checking, online, offline
+
+  // Fetch assignments on mount
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        setLoadingAssignments(true)
+        const response = await fetch("http://localhost:5000/api/assignments")
+        if (response.ok) {
+          const data = await response.json()
+          setAssignments(data || [])
+        }
+      } catch (err) {
+        console.error("Failed to load assignments:", err)
+      } finally {
+        setLoadingAssignments(false)
+      }
+    }
+    fetchAssignments()
+  }, [])
+
+  // If prefilled file name is provided, fetch the actual file
+  useEffect(() => {
+    if (prefilledFileName && !prefilledFile) {
+      const fetchPrefilledFile = async () => {
+        try {
+          const response = await fetch(`http://localhost:5000/api/homework/get_file/${prefilledFileName}`)
+          if (response.ok) {
+            const blob = await response.blob()
+            const file = new File([blob], prefilledFileName)
+            setFile(file)
+          }
+        } catch (err) {
+          console.error("Failed to load prefilled file:", err)
+        }
+      }
+      fetchPrefilledFile()
+    }
+  }, [prefilledFileName, prefilledFile])
 
   // Check backend connectivity on mount
   useEffect(() => {
@@ -167,22 +208,54 @@ function HomeworkSubmitPage() {
       <Card>
         <form onSubmit={handleSubmit} className="homework-form">
           <div className="form-group">
-            <label htmlFor="assignment-url">
-              Assignment URL <span className="required">*</span>
+            <label htmlFor="assignment-select">
+              Assignment <span className="required">*</span>
             </label>
-            <input
-              type="url"
-              id="assignment-url"
-              value={assignmentUrl}
-              onChange={(e) => setAssignmentUrl(e.target.value)}
-              placeholder="https://lms.fit.hanu.vn/mod/assign/view.php?id=18205"
-              disabled={loading}
-              required
-            />
-            <small className="help-text">
-              Example: https://lms.fit.hanu.vn/mod/assign/view.php?id=18205
-            </small>
+            {loadingAssignments ? (
+              <LoadingSpinner />
+            ) : (
+              <>
+                <select
+                  id="assignment-select"
+                  value={assignmentUrl}
+                  onChange={(e) => setAssignmentUrl(e.target.value)}
+                  disabled={loading}
+                  required
+                >
+                  <option value="">-- Select an assignment --</option>
+                  {assignments.map((assignment) => (
+                    <option key={assignment.id} value={assignment.url}>
+                      {assignment.course_name} - {assignment.title}
+                    </option>
+                  ))}
+                  <option value="manual">➕ Enter URL manually</option>
+                </select>
+                <small className="help-text">
+                  {assignments.length} assignment(s) available. Select one or enter URL manually.
+                </small>
+              </>
+            )}
           </div>
+
+          {/* Show manual URL input if "manual" is selected */}
+          {assignmentUrl === "manual" && (
+            <div className="form-group">
+              <label htmlFor="assignment-url-manual">
+                Assignment URL <span className="required">*</span>
+              </label>
+              <input
+                type="url"
+                id="assignment-url-manual"
+                onChange={(e) => setAssignmentUrl(e.target.value)}
+                placeholder="https://lms.fit.hanu.vn/mod/assign/view.php?id=18205"
+                disabled={loading}
+                required
+              />
+              <small className="help-text">
+                Example: https://lms.fit.hanu.vn/mod/assign/view.php?id=18205
+              </small>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="username">
@@ -221,11 +294,23 @@ function HomeworkSubmitPage() {
             <label htmlFor="file-input">
               Homework File <span className="required">*</span>
             </label>
+            {prefilledFileInfo && (
+              <div className="prefilled-file-info">
+                📄 Using graded file: <strong>{prefilledFileInfo}</strong>
+              </div>
+            )}
             <input
               type="file"
               id="file-input"
               onChange={handleFileChange}
               disabled={loading}
+              required={!file}
+            />
+            {file && (
+              <small className="help-text">
+                Selected: {file.name}
+              </small>
+            )}
               required
             />
             {file && (

@@ -6,7 +6,7 @@ import { apiCall } from "../utils/api"
 import ReactMarkdown from 'react-markdown';
 import "./AIToolsPage.css" // Make sure this CSS file exists
 
-function AIToolsPage() {
+function AIToolsPage({ setCurrentPage, setHomeworkSubmitParams }) {
   const [activeTab, setActiveTab] = useState("summarize")
   const [file, setFile] = useState(null) // For file uploads (summarize, questions, hint)
   const [question, setQuestion] = useState("")
@@ -383,6 +383,23 @@ function AIToolsPage() {
                             <h4>Explanation</h4>
                             <ReactMarkdown>{result.explanation}</ReactMarkdown>
                         </div>
+
+                        {/* Auto-submit option */}
+                        {result.saved_file_name && setHomeworkSubmitParams && setCurrentPage && (
+                          <div className="result-section auto-submit-section">
+                            <button
+                              className="submit-button"
+                              onClick={() => {
+                                setHomeworkSubmitParams({
+                                  prefilledFileName: result.saved_file_name
+                                })
+                                setCurrentPage('homework-submit')
+                              }}
+                            >
+                              Auto-Submit to LMS
+                            </button>
+                          </div>
+                        )}
                     </div>
                   )}
                 </div>
