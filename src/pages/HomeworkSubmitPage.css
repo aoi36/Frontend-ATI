@@ -135,20 +135,7 @@
   opacity: 0.6;
 }
 
-.form-group input[type="file"] {
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background-color: var(--background);
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.form-group input[type="file"]:disabled {
-  background-color: var(--surface);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
+/* NOTE: Standard file input styling removed in favor of custom styling below */
 
 .help-text {
   color: var(--text-muted);
@@ -342,3 +329,51 @@
   gap: 0.25rem;
 }
 
+/* NEW STYLES: Custom File Input
+   Copied from AIToolsPage.css for consistency
+*/
+
+.file-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.file-input {
+  display: none; /* Hides the browser default input */
+}
+
+.file-label {
+  display: block;
+  padding: 1.5rem 1rem;
+  background-color: var(--background);
+  border: 2px dashed var(--border);
+  border-radius: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  font-weight: 500;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.file-label:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+/* Active state when file is selected */
+.file-input:checked + .file-label,
+.file-label.has-file {
+  border-color: var(--primary);
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+}
+
+.file-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0 0;
+  text-align: center;
+}

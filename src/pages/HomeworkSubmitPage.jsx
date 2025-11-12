@@ -291,33 +291,43 @@ function HomeworkSubmitPage({ prefilledFile = null, prefilledFileName = null }) 
           </div>
 
           <div className="form-group">
-            <label htmlFor="file-input">
+            <label>
               Homework File <span className="required">*</span>
             </label>
+
             {prefilledFileInfo && (
               <div className="prefilled-file-info">
                 📄 Using graded file: <strong>{prefilledFileInfo}</strong>
               </div>
             )}
-            <input
-              type="file"
-              id="file-input"
-              onChange={handleFileChange}
-              disabled={loading}
-              required={!file}
-            />
-            {file && (
-              <small className="help-text">
-                Selected: {file.name}
-              </small>
-            )}
-              required
-            />
-            {file && (
-              <div className="file-selected">
-                ✓ Selected: {file.name}
-              </div>
-            )}
+
+            {/* Custom Styled File Input */}
+            <div className="file-input-wrapper">
+              <input
+                type="file"
+                id="file-input"
+                className="file-input"
+                onChange={handleFileChange}
+                disabled={loading}
+                required={!file}
+              />
+              <label
+                htmlFor="file-input"
+                className={`file-label ${file ? 'has-file' : ''}`}
+              >
+                {file ? (
+                  <>
+                    <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.5rem' }}>📄</span>
+                    {file.name}
+                  </>
+                ) : (
+                  <>
+                    <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '0.5rem' }}>📂</span>
+                    Choose Homework File
+                  </>
+                )}
+              </label>
+            </div>
           </div>
 
           {error && <ErrorAlert message={error} />}
@@ -380,4 +390,3 @@ function HomeworkSubmitPage({ prefilledFile = null, prefilledFileName = null }) 
 }
 
 export default HomeworkSubmitPage
-
