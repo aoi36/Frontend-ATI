@@ -9,6 +9,7 @@ function Navigation({ currentPage, setCurrentPage }) {
     { id: "search", label: "Search", icon: "🔍" },
     { id: "tools", label: "AI Tools", icon: "✨" },
     { id: "meet", label: "Schedule Meet", icon: "📹" },
+    { id: "homework-submit", label: "Submit Homework", icon: "📝" },
     { id: "scraper", label: "Scraper", icon: "⚙️" },
   ]
 

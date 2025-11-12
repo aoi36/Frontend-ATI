@@ -8,6 +8,7 @@ import AIToolsPage from "./pages/AIToolsPage"
 import MeetSchedulerPage from "./pages/MeetSchedulerPage"
 import ScraperPage from "./pages/ScraperPage"
 import FlashcardsPage from "./pages/FlashcardsPage"
+import HomeworkSubmitPage from "./pages/HomeworkSubmitPage"
 
 import "./App.css"
 import CourseDetailPage from "./pages/CourseDetailPage"
@@ -52,6 +53,8 @@ function App() {
         return <MeetSchedulerPage />
       case "scraper":
         return <ScraperPage />
+      case "homework-submit":
+        return <HomeworkSubmitPage />
       case "flashcards":
         if (flashcardParams) {
           return <FlashcardsPage 
