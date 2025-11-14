@@ -9,9 +9,11 @@ import MeetSchedulerPage from "./pages/MeetSchedulerPage"
 import ScraperPage from "./pages/ScraperPage"
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import CalendarPage from "./pages/CalendarPage";
 import { handleLogout } from "./utils/api";
 import "./App.css"
 import CourseDetailPage from "./pages/CourseDetailPage"
+import StudyPlanPage from "./pages/StudyPlanPage"
 
 function App() {
   const [currentPage, setCurrentPage] = useState("dashboard")
@@ -44,8 +46,12 @@ function App() {
             setSelectedCourse={setSelectedCourse} />
       case "search":
         return <SearchPage />
+        case "calendar":
+        return <CalendarPage />
       case "tools":
         return <AIToolsPage />
+        case "study-plan":
+        return <StudyPlanPage />;
       case "course-detail":
         if (selectedCourse) {
           return (

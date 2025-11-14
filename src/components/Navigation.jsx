@@ -14,6 +14,10 @@ function Navigation({ currentPage, setCurrentPage, onLogout }) {
     { id: 'tools', label: 'AI Tools' },
     { id: 'meet', label: 'Meet Scheduler' },
     { id: 'scraper', label: 'Scraper' },
+    { id: 'calendar', label: 'Calendar' },
+    { id: 'study-plan', label: 'Study Plan' },
+
+
   ];
 
   return (
