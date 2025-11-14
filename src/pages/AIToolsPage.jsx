@@ -79,7 +79,7 @@ function AIToolsPage() {
     
     // --- [CRITICAL LINE 2] ---
     // This line sends the ID (e.g., 473) from the state
-    formData.append("course_id", selectedCourseId) 
+    formData.append("course_db_id", selectedCourseId) 
     // -------------------------
 
     if (activeTab === "hint") {
@@ -107,7 +107,7 @@ function AIToolsPage() {
         setResult({ type: "summary", data: data })
       } else if (activeTab === "questions") {
         setResult({ type: "questions", data: data.review_questions || [] })
-      } else if (activeFtab === "hint") {
+      } else if (activeTab === "hint") {
         setResult({ type: "hint", data: data.hint || "No hint available" })
       }
 
@@ -168,7 +168,7 @@ function AIToolsPage() {
                       {courses.map((course) => (
                         // --- [CRITICAL LINE 3] ---
                         // The `value` attribute MUST be the ID
-                        <option key={course.id} value={course.course_id}>
+                        <option key={course.id} value={course.id}>
                           {course.name}
                         </option>
                         // -------------------------

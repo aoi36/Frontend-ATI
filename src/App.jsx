@@ -7,13 +7,34 @@ import SearchPage from "./pages/SearchPage"
 import AIToolsPage from "./pages/AIToolsPage"
 import MeetSchedulerPage from "./pages/MeetSchedulerPage"
 import ScraperPage from "./pages/ScraperPage"
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import { handleLogout } from "./utils/api";
 import "./App.css"
 import CourseDetailPage from "./pages/CourseDetailPage"
 
 function App() {
   const [currentPage, setCurrentPage] = useState("dashboard")
   const [selectedCourse, setSelectedCourse] = useState(null)
-
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("authToken") ? true : false);
+  const [authPage, setAuthPage] = useState("login");
+ if (!isLoggedIn) {
+    if (authPage === 'login') {
+      return (
+        <LoginPage 
+          onLoginSuccess={() => setIsLoggedIn(true)} 
+          onSwitchToRegister={() => setAuthPage('register')} // <-- 3. Add prop
+        />
+      );
+    } else {
+      return (
+        <RegisterPage 
+          onRegisterSuccess={() => setAuthPage('login')} // <-- 4. On success, go to login
+          onSwitchToLogin={() => setAuthPage('login')}   // <-- 5. Add prop
+        />
+      );
+    }
+  }
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
@@ -53,7 +74,11 @@ function App() {
 
   return (
     <div className="app">
-      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+      <Navigation 
+        currentPage={currentPage} 
+        setCurrentPage={setCurrentPage} 
+        onLogout={handleLogout} 
+      />
       <main className="main-content">{renderPage()}</main>
     </div>
   )

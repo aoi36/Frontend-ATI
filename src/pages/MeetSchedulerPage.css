@@ -139,6 +139,15 @@
   line-height: 1.5;
 }
 
+.form-group-split {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-group-split .form-group {
+  flex: 1; /* Make both inputs share the space */
+}
+
 @media (max-width: 768px) {
   .scheduler-container {
     grid-template-columns: 1fr;

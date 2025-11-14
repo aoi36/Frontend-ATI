@@ -1,37 +1,47 @@
+// src/components/Navigation.jsx
 
-import React from "react"
-import "./Navigation.css"
+import React from 'react';
+// import './Navigation.css'; // Make sure to import your CSS
 
-function Navigation({ currentPage, setCurrentPage }) {
-  const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: "📊" },
-    { id: "courses", label: "Courses", icon: "📚" },
-    { id: "search", label: "Search", icon: "🔍" },
-    { id: "tools", label: "AI Tools", icon: "✨" },
-    { id: "meet", label: "Schedule Meet", icon: "📹" },
-    { id: "scraper", label: "Scraper", icon: "⚙️" },
-  ]
+// 1. Receive the 'onLogout' prop
+function Navigation({ currentPage, setCurrentPage, onLogout }) {
+  
+  // (Your existing navigation items)
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'courses', label: 'Courses' },
+    { id: 'search', label: 'Search' },
+    { id: 'tools', label: 'AI Tools' },
+    { id: 'meet', label: 'Meet Scheduler' },
+    { id: 'scraper', label: 'Scraper' },
+  ];
 
   return (
     <nav className="navigation">
-      <div className="nav-header">
-        <h1 className="nav-title">LMS Assistant</h1>
+      <div className="nav-logo">
+        LMS Agent
       </div>
-      <ul className="nav-menu">
-        {menuItems.map((item) => (
+      <ul className="nav-links">
+        {navItems.map(item => (
           <li key={item.id}>
             <button
-              className={`nav-button ${currentPage === item.id ? "active" : ""}`}
+              className={`nav-button ${currentPage === item.id ? 'active' : ''}`}
               onClick={() => setCurrentPage(item.id)}
             >
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
+              {item.label}
             </button>
           </li>
         ))}
       </ul>
+      
+      {/* 2. Add the Logout button */}
+      <div className="nav-logout">
+        <button className="logout-button" onClick={onLogout}>
+          Logout
+        </button>
+      </div>
     </nav>
-  )
+  );
 }
 
-export default Navigation
+export default Navigation;

@@ -1,7 +1,7 @@
 // src/pages/CourseDetailPage.jsx
 
 import React, { useState, useEffect } from "react"
-import { apiCall } from "../utils/api"
+import { apiCall, apiFetchFile } from "../utils/api"
 import Card from "../components/Card"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorAlert from "../components/ErrorAlert"
@@ -15,6 +15,7 @@ function CourseDetailPage({ course, setCurrentPage }) {
   const [aiContent, setAiContent] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [previewLoading, setPreviewLoading] = useState(null);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -22,7 +23,7 @@ function CourseDetailPage({ course, setCurrentPage }) {
       
       // --- [FIX #1] ---
       // Your API sends 'id', not 'course_id'.
-      if (!course || !course.course_id) { 
+      if (!course || !course.id) { 
       // --- [END FIX] ---
         setError("No course selected.");
         setLoading(false);
@@ -36,9 +37,9 @@ function CourseDetailPage({ course, setCurrentPage }) {
         // --- [FIX #2] ---
         // Use course.course_id in all API calls
         const [deadlinesData, filesData, aiContentData] = await Promise.all([
-          apiCall(`/api/deadlines/${course.course_id}`),
-          apiCall(`/api/course/${course.course_id}/files`),
-          apiCall(`/api/course/${course.course_id}/content`)
+          apiCall(`/api/deadlines/${course.id}`),
+          apiCall(`/api/course/${course.id}/files`),
+          apiCall(`/api/course/${course.id}/content`)
         ])
         // --- [END FIX] ---
 
@@ -56,9 +57,25 @@ function CourseDetailPage({ course, setCurrentPage }) {
 
     fetchCourseDetails()
   // --- [FIX #3] ---
-  // Dependency array must also use course.course_id
-  }, [course.course_id]) 
+  // Dependency array must also use course.id
+  }, [course.id]) 
   // --- [END FIX] ---
+
+  const handleFilePreview = async (filename) => {
+    setPreviewLoading(filename); // Show spinner on this link
+    setError(null);
+    try {
+      const endpoint = `/api/get_file/${course.id}/${encodeURIComponent(filename)}`;
+      // 1. Fetch the file using our token
+      const blobUrl = await apiFetchFile(endpoint); 
+      // 2. Open the temporary URL in a new tab
+      window.open(blobUrl, '_blank'); 
+    } catch (err) {
+      setError(err.message || 'Could not open file preview.');
+    } finally {
+      setPreviewLoading(null); // Hide spinner
+    }
+  };
 
   const getDisplayFiles = () => {
     const fileSet = new Set(files); // A set of all file names
@@ -182,21 +199,28 @@ function CourseDetailPage({ course, setCurrentPage }) {
           <ul className="file-list">
             {displayFiles.map((file, i) => (
               <li key={i}>
-                <a 
-                   href={`${import.meta.env.VITE_API_URL}/api/get_file/${course.course_id}/${encodeURIComponent(file.linkName)}`}
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   // This is important:
-                   // - If it's viewable (PDF/TXT), 'download' is undefined (so it opens in-tab)
-                   // - If it's not viewable (DOCX/ZIP), 'download' is set, forcing a download
-                   download={file.isViewable ? undefined : file.displayName}
-                >
-                  {file.displayName}
-                  {/* Add a helpful (Preview) or (Download) tag */}
-                  <span className="file-type-badge">
-                    {file.isViewable ? " (Preview)" : " (Download)"}
-                  </span>
-                </a>
+                {file.isViewable ? (
+                  // --- A. VIEWABLE files (PDF, TXT, converted PDF) ---
+                  <button 
+                    className="file-link-button" // Style this like a link
+                    onClick={() => handleFilePreview(file.linkName)}
+                    disabled={previewLoading === file.linkName}
+                  >
+                    {previewLoading === file.linkName ? 'Loading...' : file.displayName}
+                    <span className="file-type-badge"> (Preview)</span>
+                  </button>
+                ) : (
+                  // --- B. DOWNLOADABLE files (ZIP, DOCX, etc.) ---
+                  <a 
+                    href={`${import.meta.env.VITE_API_URL}/api/get_file/${course.id}/${encodeURIComponent(file.linkName)}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    download={file.displayName}
+                  >
+                    {file.displayName}
+                    <span className="file-type-badge"> (Download)</span>
+                  </a>
+                )}
               </li>
             ))}
           </ul>
