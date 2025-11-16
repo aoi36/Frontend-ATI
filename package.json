@@ -12,10 +12,24 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/react": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
-  }
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aoi36/Frontend-ATI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aoi36/Frontend-ATI/issues"
+  },
+  "homepage": "https://github.com/aoi36/Frontend-ATI#readme",
+  "description": ""
 }

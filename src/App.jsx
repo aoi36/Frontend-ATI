@@ -10,33 +10,36 @@ import ScraperPage from "./pages/ScraperPage"
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import CalendarPage from "./pages/CalendarPage";
-import { handleLogout } from "./utils/api";
-import "./App.css"
 import CourseDetailPage from "./pages/CourseDetailPage"
 import StudyPlanPage from "./pages/StudyPlanPage"
+import ChatPage from "./pages/ChatPage"
+import { handleLogout } from "./utils/api";
+import "./App.css"
 
 function App() {
   const [currentPage, setCurrentPage] = useState("dashboard")
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("authToken") ? true : false);
   const [authPage, setAuthPage] = useState("login");
- if (!isLoggedIn) {
+  
+  if (!isLoggedIn) {
     if (authPage === 'login') {
       return (
         <LoginPage 
           onLoginSuccess={() => setIsLoggedIn(true)} 
-          onSwitchToRegister={() => setAuthPage('register')} // <-- 3. Add prop
+          onSwitchToRegister={() => setAuthPage('register')}
         />
       );
     } else {
       return (
         <RegisterPage 
-          onRegisterSuccess={() => setAuthPage('login')} // <-- 4. On success, go to login
-          onSwitchToLogin={() => setAuthPage('login')}   // <-- 5. Add prop
+          onRegisterSuccess={() => setAuthPage('login')}
+          onSwitchToLogin={() => setAuthPage('login')}
         />
       );
     }
   }
+
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
@@ -46,12 +49,14 @@ function App() {
             setSelectedCourse={setSelectedCourse} />
       case "search":
         return <SearchPage />
-        case "calendar":
+      case "calendar":
         return <CalendarPage />
       case "tools":
         return <AIToolsPage />
-        case "study-plan":
+      case "study-plan":
         return <StudyPlanPage />;
+      case "chat":
+        return <ChatPage />
       case "course-detail":
         if (selectedCourse) {
           return (
@@ -61,8 +66,6 @@ function App() {
             />
           )
         }
-        // --- [THE FIX] ---
-        // Add the props to the fallback render
         return (
           <CoursesPage 
             setCurrentPage={setCurrentPage} 

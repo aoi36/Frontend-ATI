@@ -1,44 +1,47 @@
-// src/components/Navigation.jsx
-
 import React from 'react';
-// import './Navigation.css'; // Make sure to import your CSS
+import './Navigation.css';
 
-// 1. Receive the 'onLogout' prop
 function Navigation({ currentPage, setCurrentPage, onLogout }) {
-  
-  // (Your existing navigation items)
   const navItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'courses', label: 'Courses' },
     { id: 'search', label: 'Search' },
     { id: 'tools', label: 'AI Tools' },
+    { id: 'chat', label: 'Chat' },
     { id: 'meet', label: 'Meet Scheduler' },
     { id: 'scraper', label: 'Scraper' },
     { id: 'calendar', label: 'Calendar' },
     { id: 'study-plan', label: 'Study Plan' },
-
-
   ];
 
   return (
     <nav className="navigation">
-      <div className="nav-logo">
-        LMS Agent
+      <div className="nav-header">
+        <h1 className="nav-title">LMS Agent</h1>
       </div>
-      <ul className="nav-links">
+      <ul className="nav-menu">
         {navItems.map(item => (
           <li key={item.id}>
             <button
               className={`nav-button ${currentPage === item.id ? 'active' : ''}`}
               onClick={() => setCurrentPage(item.id)}
             >
+              <span className="nav-icon">
+                {item.id === 'dashboard' && '📊'}
+                {item.id === 'courses' && '📚'}
+                {item.id === 'search' && '🔍'}
+                {item.id === 'tools' && '⚙️'}
+                {item.id === 'chat' && '💬'}
+                {item.id === 'meet' && '📞'}
+                {item.id === 'scraper' && '📑'}
+                {item.id === 'calendar' && '📅'}
+                {item.id === 'study-plan' && '📋'}
+              </span>
               {item.label}
             </button>
           </li>
         ))}
       </ul>
-      
-      {/* 2. Add the Logout button */}
       <div className="nav-logout">
         <button className="logout-button" onClick={onLogout}>
           Logout
