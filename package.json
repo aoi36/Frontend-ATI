@@ -19,5 +19,18 @@
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.5"
-  }
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aoi36/Frontend-ATI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aoi36/Frontend-ATI/issues"
+  },
+  "homepage": "https://github.com/aoi36/Frontend-ATI#readme",
+  "description": ""
 }

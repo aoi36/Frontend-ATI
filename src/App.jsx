@@ -12,6 +12,7 @@ import FlashcardsPage from "./pages/FlashcardsPage"
 import HomeworkSubmitPage from "./pages/HomeworkSubmitPage"
 import RegisterPage from "./pages/RegisterPage";
 import CalendarPage from "./pages/CalendarPage";
+import ChatPage from "./pages/ChatPage"
 import { handleLogout } from "./utils/api";
 import "./App.css"
 import CourseDetailPage from "./pages/CourseDetailPage"
@@ -69,6 +70,8 @@ function App() {
             setCurrentPage={setCurrentPage}
           />
         }
+       case "chat":
+        return <ChatPage />
         case "study-plan":
         return <StudyPlanPage />;
       case "course-detail":
