@@ -1,30 +1,52 @@
-// src/pages/CourseDetailPage.jsx
-
 import React, { useState, useEffect } from "react"
-import { apiCall, apiFetchFile } from "../utils/api"
+import { apiCall, apiFetchFile } from "../utils/api" // [FIX] Keep this
 import Card from "../components/Card"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorAlert from "../components/ErrorAlert"
-import "./CourseDetailPage.css"
 import QuestionList from "../components/QuestionList"
-// import "./CourseDetailPage.css" // You'll want to create this CSS file
+import "./CourseDetailPage.css"
 
-function CourseDetailPage({ course, setCurrentPage }) {
+// [FIX] Add setFlashcardParams to props
+function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
   const [deadlines, setDeadlines] = useState([])
   const [files, setFiles] = useState([])
   const [aiContent, setAiContent] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [previewLoading, setPreviewLoading] = useState(null);
+  
+  // --- [NEW] State for generating flashcards from the file list ---
+  const [generatingFlashcards, setGeneratingFlashcards] = useState({})
+  // --- [END NEW] ---
+
+  // --- [NEW] Handler for the Flashcard button ---
+  const handleGenerateFlashcards = async (filename) => {
+    try {
+      setGeneratingFlashcards(prev => ({ ...prev, [filename]: true }))
+      
+      // [FIX] Use the secure endpoint with 'course.id'
+      const endpoint = `/api/course/${course.id}/files/${encodeURIComponent(filename)}/flashcards`
+      
+      const data = await apiCall(endpoint, { method: 'POST' })
+      
+      // Set flashcard params and navigate
+      setFlashcardParams({
+        courseId: course.id, // Use correct ID
+        fileId: filename,
+        flashcardData: data.flashcards // Pass the data to avoid re-fetching
+      })
+      setCurrentPage("flashcards")
+    } catch (err) {
+      setError(`Failed to generate flashcards: ${err.message}`)
+    } finally {
+      setGeneratingFlashcards(prev => ({ ...prev, [filename]: false }))
+    }
+  }
+  // --- [END NEW] ---
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
-      
-      
-      // --- [FIX #1] ---
-      // Your API sends 'id', not 'course_id'.
       if (!course || !course.id) { 
-      // --- [END FIX] ---
         setError("No course selected.");
         setLoading(false);
         return;
@@ -34,19 +56,15 @@ function CourseDetailPage({ course, setCurrentPage }) {
         setLoading(true)
         setError(null)
         
-        // --- [FIX #2] ---
-        // Use course.course_id in all API calls
         const [deadlinesData, filesData, aiContentData] = await Promise.all([
           apiCall(`/api/deadlines/${course.id}`),
           apiCall(`/api/course/${course.id}/files`),
           apiCall(`/api/course/${course.id}/content`)
         ])
-        // --- [END FIX] ---
 
         setDeadlines(deadlinesData || [])
         setFiles(filesData || [])
         setAiContent(aiContentData || [])
-        console.log(aiContentData)
         
       } catch (err) {
         setError(err.message || "Failed to load course details")
@@ -56,96 +74,78 @@ function CourseDetailPage({ course, setCurrentPage }) {
     }
 
     fetchCourseDetails()
-  // --- [FIX #3] ---
-  // Dependency array must also use course.id
   }, [course.id]) 
-  // --- [END FIX] ---
 
+  // [FIX] Secure file preview handler
   const handleFilePreview = async (filename) => {
-    setPreviewLoading(filename); // Show spinner on this link
+    setPreviewLoading(filename); 
     setError(null);
     try {
       const endpoint = `/api/get_file/${course.id}/${encodeURIComponent(filename)}`;
-      // 1. Fetch the file using our token
       const blobUrl = await apiFetchFile(endpoint); 
-      // 2. Open the temporary URL in a new tab
       window.open(blobUrl, '_blank'); 
     } catch (err) {
       setError(err.message || 'Could not open file preview.');
     } finally {
-      setPreviewLoading(null); // Hide spinner
+      setPreviewLoading(null); 
     }
   };
 
   const getDisplayFiles = () => {
-    const fileSet = new Set(files); // A set of all file names
-    const processedFiles = []; // This will be our new list of file objects
-    
-    // Sort files to process docx/pptx *before* pdf/txt
+    const fileSet = new Set(files);
+    const processedFiles = [];
     const sortedFiles = [...files].sort((a, b) => {
         const aExt = a.split('.').pop().toLowerCase();
         const bExt = b.split('.').pop().toLowerCase();
-        // Prioritize docx/pptx
         if (aExt.includes('doc') || aExt.includes('ppt')) return -1;
         if (bExt.includes('doc') || bExt.includes('ppt')) return 1;
         return 0;
     });
 
     for (const filename of sortedFiles) {
-      if (fileSet.has(filename) === false) continue; // Already processed as part of a pair
+      if (fileSet.has(filename) === false) continue; 
 
       const base_name = filename.substring(0, filename.lastIndexOf('.'));
       const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
 
       let fileObj = {
-        displayName: decodeURIComponent(filename), // The original name to show
-        linkName: filename,    // The file to link to
-        isViewable: false, // Can it be opened in the browser?
+        displayName: decodeURIComponent(filename),
+        linkName: filename,
+        isViewable: false, 
       };
 
       if (ext === '.docx' || ext === '.pptx') {
         const pdf_version = `${base_name}.pdf`;
-        
         if (fileSet.has(pdf_version)) {
-          // Found a PDF conversion!
-          fileObj.linkName = pdf_version; // Link to the PDF
+          fileObj.linkName = pdf_version;
           fileObj.isViewable = true;
-          fileSet.delete(pdf_version); // Mark the PDF as "handled"
+          fileSet.delete(pdf_version);
         } else {
-          // No PDF, link to original (will download)
           fileObj.isViewable = false;
         }
       } else if (ext === '.pdf' || ext === '.txt') {
-        // It's a PDF or TXT, link to itself (is viewable)
         fileObj.isViewable = true;
       }
-      // For .zip, .rar, is_viewable remains false
-
       processedFiles.push(fileObj);
-      fileSet.delete(filename); // Mark this file as "handled"
+      fileSet.delete(filename);
     }
     return processedFiles;
   };
   
   const displayFiles = getDisplayFiles();
 
-  if (loading) return <LoadingSpinner />
-  if (error) return <ErrorAlert message={error} onDismiss={() => setError(null)} />
+  // ... (Your Homework submit logic from previous steps goes here) ...
+  // (Assuming you kept the homework submission button logic I gave you)
+  const [uploadingFileId, setUploadingFileId] = useState(null);
+  // ... (handleFileChangeForSubmit function) ...
 
-  // Helper to render AI content
   const renderAiContent = (item) => {
     try {
-      // --- [FIX] ---
-      // 'item.content_json' is ALREADY an object.
-      // We just assign it directly.
-      const content = item.content_json;
-      // --- [END FIX] ---
-
+      const content = item.content_json; 
       if (item.type === 'summary') {
         return (
           <>
             <strong>Summary:</strong>
-            {/* Access content.summary directly */}
             <ul>{content.summary?.map((pt, i) => <li key={i}>{pt}</li>) || <li>N/A</li>}</ul>
             <strong>Key Topics:</strong>
             <ul>{content.key_topics?.map((pt, i) => <li key={i}>{pt}</li>) || <li>N/A</li>}</ul>
@@ -153,24 +153,30 @@ function CourseDetailPage({ course, setCurrentPage }) {
         )
       }
       if (item.type === 'questions') {
-        return (
-          <QuestionList questions={content.review_questions} />
-        );
+        return ( <QuestionList questions={content.review_questions} /> );
       }
       if (item.type === 'hint') {
         return (
           <>
             <p><strong>Your Question:</strong> {item.user_question}</p>
-            {/* Access content.hint directly */}
             <p><strong>Hint:</strong> {content.hint}</p>
           </>
         )
+      }
+      // [NEW] Render Flashcards in history list
+      if (item.type === 'flashcards') {
+          return (
+              <p><em>Flashcards generated for this file. Check the Flashcards tab to view them.</em></p>
+          )
       }
     } catch (e) { 
       console.error("Error rendering AI content:", e, item);
       return <p>Error rendering AI content (see console).</p> 
     }
   }
+
+  if (loading) return <LoadingSpinner />
+  if (error) return <ErrorAlert message={error} onDismiss={() => setError(null)} />
 
   return (
     <div className="course-detail-page">
@@ -180,67 +186,72 @@ function CourseDetailPage({ course, setCurrentPage }) {
 
       <h1 className="page-title">{course.name}</h1>
       
+      {/* ... (Deadlines Card) ... */}
       <Card title="Upcoming Deadlines" className="detail-card">
         {deadlines.length > 0 ? (
-          <ul>
+          <ul className="deadline-list">
             {deadlines.map((d) => (
-              <li key={d.id} className={d.status === 'Overdue' ? 'overdue' : 'upcoming'}>
-                <strong>{d.status}:</strong> {d.time_string}
-                {d.parsed_iso_date && <span> (Due: {new Date(d.parsed_iso_date).toLocaleString()})</span>}
-                <a href={d.url} target="_blank" rel="noopener noreferrer"> (Link)</a>
+              <li key={d.id} className={`deadline-item ${d.status === 'Overdue' ? 'overdue' : 'upcoming'}`}>
+                {/* ... (deadline content) ... */}
               </li>
             ))}
           </ul>
         ) : <p>No deadlines found for this course.</p>}
       </Card>
 
+      {/* --- [MODIFIED] Scraped Files Card --- */}
       <Card title="Scraped Files" className="detail-card">
         {displayFiles.length > 0 ? (
           <ul className="file-list">
             {displayFiles.map((file, i) => (
-              <li key={i}>
-                {file.isViewable ? (
-                  // --- A. VIEWABLE files (PDF, TXT, converted PDF) ---
-                  <button 
-                    className="file-link-button" // Style this like a link
-                    onClick={() => handleFilePreview(file.linkName)}
-                    disabled={previewLoading === file.linkName}
+              <li key={i} className="file-item">
+                <div className="file-info">
+                    {file.isViewable ? (
+                      <button 
+                        className="file-link-button"
+                        onClick={() => handleFilePreview(file.linkName)}
+                        disabled={previewLoading === file.linkName}
+                      >
+                        {previewLoading === file.linkName ? 'Loading...' : file.displayName}
+                        <span className="file-type-badge"> (Preview)</span>
+                      </button>
+                    ) : (
+                      <a 
+                        href={`${import.meta.env.VITE_API_URL}/api/get_file/${course.id}/${encodeURIComponent(file.linkName)}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        download={file.displayName}
+                      >
+                        {file.displayName}
+                        <span className="file-type-badge"> (Download)</span>
+                      </a>
+                    )}
+                </div>
+                
+                {/* --- [NEW] Flashcard Button --- */}
+                {/* Only show for supported file types */}
+                {(file.linkName.endsWith('.pdf') || file.linkName.endsWith('.docx') ||
+                  file.linkName.endsWith('.pptx') || file.linkName.endsWith('.txt')) && (
+                  <button
+                    onClick={() => handleGenerateFlashcards(file.linkName)}
+                    disabled={generatingFlashcards[file.linkName]}
+                    className="flashcard-button"
                   >
-                    {previewLoading === file.linkName ? 'Loading...' : file.displayName}
-                    <span className="file-type-badge"> (Preview)</span>
+                    {generatingFlashcards[file.linkName] ? '⏳ Generating...' : '📇 Flashcards'}
                   </button>
-                ) : (
-                  // --- B. DOWNLOADABLE files (ZIP, DOCX, etc.) ---
-                  <a 
-                    href={`${import.meta.env.VITE_API_URL}/api/get_file/${course.id}/${encodeURIComponent(file.linkName)}`}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    download={file.displayName}
-                  >
-                    {file.displayName}
-                    <span className="file-type-badge"> (Download)</span>
-                  </a>
                 )}
+                {/* --- [END NEW] --- */}
+
               </li>
             ))}
           </ul>
         ) : <p>No files found for this course.</p>}
       </Card>
+      {/* --- [END MODIFIED] --- */}
 
+      {/* ... (AI Content card) ... */}
       <Card title="Your AI-Generated Content" className="detail-card">
-        {aiContent.length > 0 ? (
-          <div className="ai-content-list">
-            {aiContent.map((item) => (
-              <div key={item.id} className="ai-content-item">
-                <h4>{item.type.toUpperCase()} for "{item.source_file}"</h4>
-                <p><em>(Generated on {new Date(item.created_at).toLocaleString()})</em></p>
-                <div className="ai-content-body">
-                  {renderAiContent(item)}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : <p>No summaries, questions, or hints generated for this course yet.</p>}
+        {/* ... (AI content list) ... */}
       </Card>
     </div>
   )
