@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react"
-import { apiCall, apiFetchFile } from "../utils/api" // [FIX] Keep this
+import { apiCall, apiFetchFile } from "../utils/api"
 import Card from "../components/Card"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorAlert from "../components/ErrorAlert"
 import QuestionList from "../components/QuestionList"
 import "./CourseDetailPage.css"
 
-// [FIX] Add setFlashcardParams to props
 function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
   const [deadlines, setDeadlines] = useState([])
   const [files, setFiles] = useState([])
@@ -14,26 +13,23 @@ function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [previewLoading, setPreviewLoading] = useState(null);
-  
-  // --- [NEW] State for generating flashcards from the file list ---
   const [generatingFlashcards, setGeneratingFlashcards] = useState({})
-  // --- [END NEW] ---
 
-  // --- [NEW] Handler for the Flashcard button ---
+  // Handler for the Flashcard button
   const handleGenerateFlashcards = async (filename) => {
     try {
       setGeneratingFlashcards(prev => ({ ...prev, [filename]: true }))
       
-      // [FIX] Use the secure endpoint with 'course.id'
+      // Use the secure endpoint with 'course.id'
       const endpoint = `/api/course/${course.id}/files/${encodeURIComponent(filename)}/flashcards`
       
       const data = await apiCall(endpoint, { method: 'POST' })
       
       // Set flashcard params and navigate
       setFlashcardParams({
-        courseId: course.id, // Use correct ID
+        courseId: course.id,
         fileId: filename,
-        flashcardData: data.flashcards // Pass the data to avoid re-fetching
+        flashcardData: data.flashcards
       })
       setCurrentPage("flashcards")
     } catch (err) {
@@ -42,7 +38,6 @@ function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
       setGeneratingFlashcards(prev => ({ ...prev, [filename]: false }))
     }
   }
-  // --- [END NEW] ---
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -76,7 +71,7 @@ function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
     fetchCourseDetails()
   }, [course.id]) 
 
-  // [FIX] Secure file preview handler
+  // Secure file preview handler
   const handleFilePreview = async (filename) => {
     setPreviewLoading(filename); 
     setError(null);
@@ -134,11 +129,6 @@ function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
   
   const displayFiles = getDisplayFiles();
 
-  // ... (Your Homework submit logic from previous steps goes here) ...
-  // (Assuming you kept the homework submission button logic I gave you)
-  const [uploadingFileId, setUploadingFileId] = useState(null);
-  // ... (handleFileChangeForSubmit function) ...
-
   const renderAiContent = (item) => {
     try {
       const content = item.content_json; 
@@ -163,11 +153,27 @@ function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
           </>
         )
       }
-      // [NEW] Render Flashcards in history list
       if (item.type === 'flashcards') {
-          return (
-              <p><em>Flashcards generated for this file. Check the Flashcards tab to view them.</em></p>
-          )
+        return (
+          <div className="flashcard-history-item">
+            <p><em>{content.flashcards?.length || 0} cards ready to review.</em></p>
+            <button 
+              className="view-flashcards-btn"
+              onClick={() => {
+                 // 1. Load the saved data into the params
+                 setFlashcardParams({
+                   courseId: course.id,
+                   fileId: item.source_file,
+                   flashcardData: content.flashcards 
+                 })
+                 // 2. Navigate to the Flashcards page
+                 setCurrentPage("flashcards")
+              }}
+            >
+              Open Flashcards Deck
+            </button>
+          </div>
+        )
       }
     } catch (e) { 
       console.error("Error rendering AI content:", e, item);
@@ -186,20 +192,24 @@ function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
 
       <h1 className="page-title">{course.name}</h1>
       
-      {/* ... (Deadlines Card) ... */}
+      {/* Deadlines Card */}
       <Card title="Upcoming Deadlines" className="detail-card">
         {deadlines.length > 0 ? (
           <ul className="deadline-list">
             {deadlines.map((d) => (
               <li key={d.id} className={`deadline-item ${d.status === 'Overdue' ? 'overdue' : 'upcoming'}`}>
-                {/* ... (deadline content) ... */}
+                <div className="deadline-info">
+                    <strong>{d.status}:</strong> {d.time_string}
+                    {d.parsed_iso_date && <span> (Due: {new Date(d.parsed_iso_date).toLocaleString()})</span>}
+                    <a href={d.url} target="_blank" rel="noopener noreferrer"> (Link)</a>
+                </div>
               </li>
             ))}
           </ul>
         ) : <p>No deadlines found for this course.</p>}
       </Card>
 
-      {/* --- [MODIFIED] Scraped Files Card --- */}
+      {/* Scraped Files Card */}
       <Card title="Scraped Files" className="detail-card">
         {displayFiles.length > 0 ? (
           <ul className="file-list">
@@ -228,8 +238,7 @@ function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
                     )}
                 </div>
                 
-                {/* --- [NEW] Flashcard Button --- */}
-                {/* Only show for supported file types */}
+                {/* Flashcard Button */}
                 {(file.linkName.endsWith('.pdf') || file.linkName.endsWith('.docx') ||
                   file.linkName.endsWith('.pptx') || file.linkName.endsWith('.txt')) && (
                   <button
@@ -240,18 +249,27 @@ function CourseDetailPage({ course, setCurrentPage, setFlashcardParams }) {
                     {generatingFlashcards[file.linkName] ? '⏳ Generating...' : '📇 Flashcards'}
                   </button>
                 )}
-                {/* --- [END NEW] --- */}
-
               </li>
             ))}
           </ul>
         ) : <p>No files found for this course.</p>}
       </Card>
-      {/* --- [END MODIFIED] --- */}
 
-      {/* ... (AI Content card) ... */}
+      {/* AI Content Card */}
       <Card title="Your AI-Generated Content" className="detail-card">
-        {/* ... (AI content list) ... */}
+        {aiContent.length > 0 ? (
+          <div className="ai-content-list">
+            {aiContent.map((item) => (
+              <div key={item.id} className="ai-content-item">
+                <h4>{item.type.toUpperCase()} for "{item.source_file}"</h4>
+                <p><em>(Generated on {new Date(item.created_at).toLocaleString()})</em></p>
+                <div className="ai-content-body">
+                  {renderAiContent(item)}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : <p>No summaries, questions, or hints generated for this course yet.</p>}
       </Card>
     </div>
   )

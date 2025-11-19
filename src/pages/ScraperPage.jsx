@@ -25,50 +25,50 @@ function ScraperPage() {
   useEffect(() => {
     let intervalId = null;
 
-    // This function polls the STATUS endpoint
     const pollStatus = async () => {
       try {
-        // --- [THE FIX] ---
-        // Call the /api/scrape/status endpoint
-        // This is a simple GET request, no body needed
+        // 1. Get status AND result
         const data = await apiCall("/api/scrape/status", { method: "GET" });
-        // --- [END FIX] ---
 
         if (data.status === "idle") {
-          // Scrape is done!
-          addLog("✅ Backend scrape completed successfully!");
-          setSuccess("Scraping completed. All courses and files updated.");
-          setStatus("completed");
-          setLoading(false); // Re-enable the button
+          // The backend says it's done. Now check if it succeeded or failed.
+          
+          if (data.result && data.result.success === false) {
+             // --- [CASE 1: FAILED] ---
+             addLog(`❌ Scrape Failed: ${data.result.message}`);
+             setError(`Scrape Failed: ${data.result.message}`); // Show red alert
+             setStatus("error");
+          } else {
+             // --- [CASE 2: SUCCESS] ---
+             // (Or if result is null, we assume it just finished cleanly)
+             addLog("✅ Backend scrape completed successfully!");
+             setSuccess("Scraping completed. All courses and files updated.");
+             setStatus("completed");
+          }
+          
+          setLoading(false);
           if (intervalId) clearInterval(intervalId); // Stop polling
-        } else {
-          // status is "scraping", do nothing and let it poll again
-          // addLog("Backend is still scraping..."); // We removed this to reduce noise
-        }
+        } 
+        // If data.status is "scraping", we do nothing and loop again.
+        
       } catch (err) {
         addLog(`Error polling status: ${err.message}`);
-        setError(err.message || "Failed to get scrape status");
+        setError("Failed to check scrape status.");
         setStatus("error");
-        setLoading(false); // Stop on error
+        setLoading(false);
         if (intervalId) clearInterval(intervalId);
       }
     };
 
-    // If the component's status is "scraping", start the poller
     if (status === "scraping") {
-      setLoading(true); // Keep the UI in a "loading" state
-      // Poll every 5 seconds
-      intervalId = setInterval(pollStatus, 5000); 
+      setLoading(true);
+      intervalId = setInterval(pollStatus, 3000); // Poll every 3 seconds
     }
 
-    // Cleanup function: This runs when the component unmounts
-    // or when the 'status' variable changes
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalId) clearInterval(intervalId);
     };
-  }, [status]); // Dependency array is correct
+  }, [status]);
 
   // --- [FIXED] handleScrape only *starts* the job ---
   const handleScrape = async () => {

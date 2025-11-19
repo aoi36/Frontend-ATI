@@ -62,3 +62,84 @@ a {
 a:hover {
   color: var(--secondary-light);
 }
+
+.card input,      .card textarea,      .card select,
+.login-card input, .login-card textarea, .login-card select,
+.form-card input,  .form-card textarea,  .form-card select,
+.card-large input, .card-large textarea, .card-large select,
+.dashboard input,  .dashboard textarea,  .dashboard select,
+.learning-insights-page input, 
+.learning-insights-page textarea, 
+.learning-insights-page select {
+  
+  /* 1. Force text to be dark gray/black */
+  color: #1a202c !important; 
+  
+  /* 2. Force background to be white */
+  background-color: #ffffff !important;
+  
+  /* 3. Ensure border is visible */
+  border-color: #cbd5e0 !important;
+}
+
+/* Fix the Placeholder text color (so it's visible but lighter)
+*/
+.card input::placeholder,      .card textarea::placeholder,
+.login-card input::placeholder, .login-card textarea::placeholder,
+.learning-insights-page input::placeholder,
+.learning-insights-page textarea::placeholder {
+  color: #a0aec0 !important; /* Medium Gray */
+  opacity: 1;
+}
+
+/* Fix Labels to be dark inside these containers 
+*/
+.card label, 
+.login-card label,
+.form-label,
+.learning-insights-page label {
+  color: #2d3748 !important;
+}
+
+.card.card-dark .card-title,
+.card-large.card-dark .card-title {
+  color: #ffffff !important; /* Force White Title */
+}
+
+.card.card-dark input,
+.card.card-dark textarea,
+.card.card-dark select {
+  color: #ffffff !important;       /* White input text */
+  background-color: #2d3748 !important; /* Dark input background */
+  border-color: #4a5568 !important;     /* Darker border */
+}
+
+.card.card-dark label,
+.card.card-dark .form-label {
+  color: #e2e8f0 !important; /* Light Gray labels */
+}
+
+.card.card-dark input::placeholder,
+.card.card-dark textarea::placeholder {
+  color: #a0aec0 !important; /* Light placeholder */
+}
+.card:not(.card-dark),
+.login-card,
+.form-card,
+.card-large {
+  color: #2d3748 !important; /* Force Dark Gray text */
+}
+.card:not(.card-dark) h1, 
+.card:not(.card-dark) h2, 
+.card:not(.card-dark) h3, 
+.card:not(.card-dark) h4, 
+.card:not(.card-dark) h5, 
+.card:not(.card-dark) h6 {
+  color: #1a202c !important; /* Very Dark Gray/Black */
+}
+.card:not(.card-dark) p,
+.card:not(.card-dark) span,
+.card:not(.card-dark) .action-description,
+.card:not(.card-dark) .course-description {
+  color: #4a5568 !important;
+}

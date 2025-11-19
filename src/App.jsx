@@ -47,7 +47,7 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <Dashboard />
+        return <Dashboard setCurrentPage={setCurrentPage}/>
       case 'courses':
         return <CoursesPage setCurrentPage={setCurrentPage} setSelectedCourse={setSelectedCourse} />
       case 'search':

@@ -1,4 +1,5 @@
-/* Modernized calendar page with improved forms, enhanced buttons, and refined styling */
+/* src/pages/CalendarPage.css */
+
 .calendar-page {
   padding: 2rem;
 }
@@ -7,16 +8,13 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .control-card .card-title {
   margin-top: 0;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 1rem;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #111827;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.75rem;
 }
 
 .control-card .button-group {
@@ -27,139 +25,101 @@
 
 .submit-button {
   width: 100%;
-  padding: 0.875rem;
+  padding: 12px;
   font-size: 1rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  font-weight: 600;
+  background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
   color: white;
   border: none;
-  border-radius: 0.625rem;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
 }
-
 .submit-button:hover {
+  opacity: 0.9;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
 }
-
 .submit-button:disabled {
-  background: #d1d5db;
+  background: #aaa;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  transform: translateY(0);
+  opacity: 0.7;
 }
 
 .submit-button.secondary {
-  background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(90deg, #6c757d 0%, #343a40 100%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .form-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
-
 .form-label {
   display: block;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #111827;
-  font-size: 0.95rem;
 }
-
 .form-input {
   width: 100%;
-  padding: 0.875rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.625rem;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
   font-size: 1rem;
   box-sizing: border-box;
-  background: white;
-  color: #111827;
-  transition: all 0.3s ease;
 }
-
-.form-input:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
 .file-hint {
   font-size: 0.85rem;
-  color: #9ca3af;
+  color: #666;
   margin-top: 0.5rem;
-  font-weight: 500;
 }
 
 .calendar-card {
   padding: 1.5rem;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.875rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
+/* --- FullCalendar Style Overrides --- */
+/* Make the calendar responsive and clean */
 .fc {
   max-width: 100%;
   margin: 0 auto;
 }
-
 .fc .fc-toolbar-title {
   font-size: 1.75rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.fc .fc-button {
-  background: #6366f1;
-  border: none;
-  transition: all 0.3s ease;
   font-weight: 600;
 }
-
+.fc .fc-button {
+  background: #007bff;
+  border: none;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
 .fc .fc-button:hover {
-  background: #7c3aed;
-  transform: translateY(-1px);
+  opacity: 1;
 }
-
 .fc .fc-button-primary:not(:disabled).fc-button-active {
-  background-color: #7c3aed;
+  background-color: #0056b3;
 }
-
 .fc .fc-daygrid-event {
-  border-radius: 0.5rem;
-  padding: 3px 6px;
+  border-radius: 4px;
+  padding: 2px 5px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .fc .fc-event-main {
   color: #fff !important;
 }
 
+/* For the success/error alerts */
 .success-alert {
-  padding: 1.25rem;
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #6ee7b7;
-  border-radius: 0.625rem;
+  padding: 1rem;
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
   margin-bottom: 1.5rem;
   text-align: center;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.success-alert:hover {
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-}
-
-@media (max-width: 768px) {
-  .calendar-controls {
-    grid-template-columns: 1fr;
-  }
 }
