@@ -10,5 +10,5 @@ import './index.css' // Import your main stylesheet
 ReactDOM.createRoot(document.getElementById('app')).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
 )

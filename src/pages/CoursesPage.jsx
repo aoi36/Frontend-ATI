@@ -1,10 +1,10 @@
-import React from "react"
-import { useState, useEffect } from "react"
-import Card from "../components/Card"
-import LoadingSpinner from "../components/LoadingSpinner"
-import ErrorAlert from "../components/ErrorAlert"
-import { apiCall } from "../utils/api"
-import "./CoursesPage.css" // Make sure to create this CSS file for styling
+import React from 'react'
+import { useState, useEffect } from 'react'
+import Card from '../components/Card'
+import LoadingSpinner from '../components/LoadingSpinner'
+import ErrorAlert from '../components/ErrorAlert'
+import { apiCall } from '../utils/api'
+import './CoursesPage.css' // Make sure to create this CSS file for styling
 
 // This component receives 'setCurrentPage' and 'setSelectedCourse' as props from App.jsx
 function CoursesPage({ setCurrentPage, setSelectedCourse }) {
@@ -17,11 +17,11 @@ function CoursesPage({ setCurrentPage, setSelectedCourse }) {
     const fetchCourses = async () => {
       try {
         setLoading(true)
-        const data = await apiCall("/api/courses") // Fetches from your API
+        const data = await apiCall('/api/courses') // Fetches from your API
         setCourses(data || [])
         setError(null)
       } catch (err) {
-        setError(err.message || "Failed to load courses")
+        setError(err.message || 'Failed to load courses')
       } finally {
         setLoading(false)
       }
@@ -32,7 +32,7 @@ function CoursesPage({ setCurrentPage, setSelectedCourse }) {
   // This function is called when a user clicks on a course card
   const handleCourseClick = (course) => {
     setSelectedCourse(course) // Sets the selected course in App.jsx
-    setCurrentPage("course-detail") // Tells App.jsx to change the page
+    setCurrentPage('course-detail') // Tells App.jsx to change the page
   }
 
   return (
@@ -40,12 +40,12 @@ function CoursesPage({ setCurrentPage, setSelectedCourse }) {
       <h1 className="page-title">My Courses</h1>
 
       {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
-      
+
       {loading ? (
         <LoadingSpinner />
       ) : (
         // A grid to display the course cards
-        <div className="course-list-grid"> 
+        <div className="courses-list">
           {courses.length > 0 ? (
             courses.map((course) => (
               <Card
@@ -56,13 +56,13 @@ function CoursesPage({ setCurrentPage, setSelectedCourse }) {
               >
                 {/* You can add any other content inside the card here */}
                 <p>Course ID: {course.id}</p>
-                
+
                 {/* This link lets the user open the original Moodle page in a new tab */}
                 {/* e.stopPropagation() prevents the card's click event from firing */}
-                <a 
-                  href={course.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href={course.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                 >
                   Go to LMS Page

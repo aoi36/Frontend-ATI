@@ -312,7 +312,7 @@ function ProgressSection({ dashboard, selectedCourse, onRefresh }) {
           </Card>
 
           {/* RIGHT: Update Progress Form */}
-          <Card title="Update Progress" className="card-large card-form">
+          <Card title="Update Progress" className="card-large">
             <div className="form-group">
               <label>📊 Completed Topics:</label>
               <input

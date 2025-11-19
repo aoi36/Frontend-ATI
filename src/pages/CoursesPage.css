@@ -24,11 +24,20 @@
 }
 
 .courses-list {
+  margin-top: 1rem;
+  flex-direction: column; /* xếp card theo chiều dọc */
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.course-card {
+  width: 100%;
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
-  padding: 1.5rem;
-  height: fit-content;
+  padding: 1rem;
+  transition: all 0.2s ease;
 }
 
 .course-items {

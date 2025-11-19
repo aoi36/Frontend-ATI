@@ -244,8 +244,8 @@
   font-family: inherit;
   font-size: 0.95rem;
   resize: none;
-  max-height: 120px;
-  overflow-y: auto;
+  max-height: none; /* allow unlimited height */
+  overflow: hidden; /* remove scroll bar */
   transition: border-color 0.2s ease;
 }
 
@@ -267,7 +267,7 @@
 }
 
 .provider-badge {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   background-color: rgba(99, 102, 241, 0.1);
   border: 1px solid var(--primary);
   border-radius: 1.5rem;
