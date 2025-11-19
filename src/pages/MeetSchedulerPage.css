@@ -55,6 +55,27 @@
   color: var(--text-primary) !important;
 }
 
+/* Style Ant Design DatePicker to match form inputs */
+.form-input.ant-picker {
+  padding: 0.75rem !important;
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.5rem !important;
+  color: var(--text-primary) !important;
+  height: auto !important;
+  font-size: 1rem !important;
+}
+
+.form-input.ant-picker input {
+  color: var(--text-primary) !important;
+  background-color: var(--background) !important;
+}
+
+.form-input.ant-picker-focused,
+.form-input.ant-picker:hover {
+  border-color: var(--primary) !important;
+}
+
 .form-input:focus {
   outline: none;
   border-color: var(--primary) !important;
@@ -145,11 +166,37 @@
 }
 
 .form-group-split .form-group {
-  flex: 1; /* Make both inputs share the space */
+  flex: 1;
 }
 
 @media (max-width: 768px) {
   .scheduler-container {
     grid-template-columns: 1fr;
   }
+}
+/* ===== FIX ANTD DATEPICKER TEXT + PLACEHOLDER TO WHITE ===== */
+
+/* Input text */
+.ant-picker-input > input {
+  color: var(--text-primary) !important; /* trắng */
+}
+
+/* Placeholder */
+.ant-picker-input > input::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Calendar icon */
+.ant-picker-suffix {
+  color: var(--text-primary) !important;
+}
+
+/* ⬇️ NEW: giữ nguyên màu icon khi hover */
+.ant-picker:hover .ant-picker-suffix {
+  color: var(--text-primary) !important;
+}
+
+/* ⬇️ NEW: giữ nguyên màu của nút clear (x) khi hover */
+.ant-picker:hover .ant-picker-clear {
+  color: rgba(255, 255, 255, 0.6) !important;
 }

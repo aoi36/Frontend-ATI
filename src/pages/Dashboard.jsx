@@ -1,11 +1,10 @@
-
-import React from "react"
-import { useState, useEffect } from "react"
-import Card from "../components/Card"
-import LoadingSpinner from "../components/LoadingSpinner"
-import ErrorAlert from "../components/ErrorAlert"
-import { apiCall } from "../utils/api"
-import "./Dashboard.css"
+import React from 'react'
+import { useState, useEffect } from 'react'
+import Card from '../components/Card'
+import LoadingSpinner from '../components/LoadingSpinner'
+import ErrorAlert from '../components/ErrorAlert'
+import { apiCall } from '../utils/api'
+import './Dashboard.css'
 
 function Dashboard() {
   const [courses, setCourses] = useState([])
@@ -19,11 +18,11 @@ function Dashboard() {
   const fetchCourses = async () => {
     try {
       setLoading(true)
-      const data = await apiCall("/api/courses")
+      const data = await apiCall('/api/courses')
       setCourses(data || [])
       setError(null)
     } catch (err) {
-      setError(err.message || "Failed to load courses")
+      setError(err.message || 'Failed to load courses')
     } finally {
       setLoading(false)
     }
@@ -59,7 +58,7 @@ function Dashboard() {
               {courses.length > 0 ? (
                 courses.slice(0, 6).map((course) => (
                   <Card key={course.id} title={course.name} className="course-card">
-                    <p className="course-description">{course.description || "No description"}</p>
+                    <p className="course-description">{course.description || 'No description'}</p>
                   </Card>
                 ))
               ) : (
