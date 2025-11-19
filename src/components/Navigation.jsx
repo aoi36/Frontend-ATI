@@ -1,5 +1,5 @@
-import React from 'react';
-import './Navigation.css';
+import React from 'react'
+import './Navigation.css'
 
 function Navigation({ currentPage, setCurrentPage, onLogout }) {
   const navItems = [
@@ -12,7 +12,8 @@ function Navigation({ currentPage, setCurrentPage, onLogout }) {
     { id: 'scraper', label: 'Scraper' },
     { id: 'calendar', label: 'Calendar' },
     { id: 'study-plan', label: 'Study Plan' },
-  ];
+    { id: 'learning-insights', label: 'Learning Insights' },
+  ]
 
   return (
     <nav className="navigation">
@@ -20,7 +21,7 @@ function Navigation({ currentPage, setCurrentPage, onLogout }) {
         <h1 className="nav-title">LMS Agent</h1>
       </div>
       <ul className="nav-menu">
-        {navItems.map(item => (
+        {navItems.map((item) => (
           <li key={item.id}>
             <button
               className={`nav-button ${currentPage === item.id ? 'active' : ''}`}
@@ -36,6 +37,7 @@ function Navigation({ currentPage, setCurrentPage, onLogout }) {
                 {item.id === 'scraper' && '📑'}
                 {item.id === 'calendar' && '📅'}
                 {item.id === 'study-plan' && '📋'}
+                {item.id === 'learning-insights' && '📈'}
               </span>
               {item.label}
             </button>
@@ -48,7 +50,7 @@ function Navigation({ currentPage, setCurrentPage, onLogout }) {
         </button>
       </div>
     </nav>
-  );
+  )
 }
 
-export default Navigation;
+export default Navigation
